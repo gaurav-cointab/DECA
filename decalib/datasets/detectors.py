@@ -14,7 +14,7 @@
 # For commercial licensing contact, please contact ps-license@tuebingen.mpg.de
 
 import numpy as np
-
+import torch
 
 class FAN(object):
     def __init__(self, device='cuda'):

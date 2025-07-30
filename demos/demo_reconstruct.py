@@ -13,22 +13,22 @@
 # For comments or questions, please email us at deca@tue.mpg.de
 # For commercial licensing contact, please contact ps-license@tuebingen.mpg.de
 
-import argparse
-import os
-import sys
-
+import os, sys
 import cv2
 import numpy as np
-import torch
+from time import time
 from scipy.io import savemat
+import argparse
 from tqdm import tqdm
+import torch
+
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from decalib.deca import DECA
 from decalib.datasets import datasets
 from decalib.utils import util
 from decalib.utils.config import cfg as deca_cfg
-
+from decalib.utils.tensor_cropper import transform_points
 
 def main(args):
     # if args.rasterizer_type != 'standard':
