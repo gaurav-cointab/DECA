@@ -2,7 +2,7 @@
 #`pip install -r requirements.txt`
 numpy>=1.18.5
 scipy>=1.4.1 
-# chumpy>=0.69
+chumpy>=0.69
 scikit-image>=0.15 
 opencv-python
 scikit-image>=0.15     #skimage
@@ -11,5 +11,5 @@ face-alignment
 yacs==0.1.8
 kornia
 ninja
-# fvcore
+fvcore
 # pytorch3d
