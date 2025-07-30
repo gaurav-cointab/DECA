@@ -35,7 +35,7 @@ def set_rasterizer(type='pytorch3d'):
         from .util import load_obj
         #     Use JIT Compiling Extensions
         #     ref: https://pytorch.org/tutorials/advanced/cpp_extension.html
-        from torch.utils.cpp_extension import load, CUDA_HOME
+        from torch.utils.cpp_extension import load
         curr_dir = os.path.dirname(__file__)
         standard_rasterize_cuda = \
             load(name='standard_rasterize_cuda',
