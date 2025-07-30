@@ -7,11 +7,9 @@ scikit-image>=0.15
 opencv-python>=4.1.1 
 scikit-image>=0.15     #skimage
 PyYAML
-torch==1.11.0
-torchvision==0.12.0
 face-alignment
 yacs==0.1.8
 kornia
 ninja
 fvcore
-pytorch3d
+# pytorch3d
