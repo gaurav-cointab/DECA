@@ -9,27 +9,27 @@ add-apt-repository ppa:ubuntu-toolchain-r/test -y<br/>
 apt update<br/>
 apt-get install python3.10 python3.10-venv python3.10-distutils libgl1 python3.10-dev gcc-11 g++-11<br/>
 
-Step 2: Clone Repo
-
-Step 3: Setup DECA
+Step 2: Clone Repo & Setup DECA
 >cd ~/DECA<br/>
 python3.10 -m venv --without-pip deca<br/>
 source deca/bin/activate<br/>
 python --version<br/>
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py <br/>
 python get-pip.py <br/>
-pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117 <br/>
 pip install --upgrade pip setuptools wheel build cython<br/>
+pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117 <br/>
 pip install -r requirements.txt<br/>
 bash fetch_data.sh<br/>
 
 Step 4: Copy Relevant Data
 1. Download file from "https://drive.usercontent.google.com/download?id=1rp8kdyLPvErw2dTmqtjISRVvQLj6Yzje&export=download&authuser=0"
+2. Move it to data folder.
 
 Step 5: Run Reconstruct
 >python demos/demo_reconstruct.py -i TestSamples/personal --saveDepth True --saveObj True -s TestSamples/personal/output --saveVis true --saveKpt true <br/>
 
-Step 6: Use Meshlab to view the output .obj files.
+Use Meshlab to view the output .obj files.<br/>
+Or any other use case you want to. Other usecases, I have not tried, you are welcome to try them and fix them in your own forks.
 
 # DECA: Detailed Expression Capture and Animation (SIGGRAPH2021)
 
