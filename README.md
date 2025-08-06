@@ -2,6 +2,7 @@
 
 OS: Ubuntu 20.04<br/>
 GPU: L4<br/>
+CUDA: 12.4v<br/>
 
 Step 1: Setup Env
 >add-apt-repository ppa:deadsnakes/ppa -y<br/>
