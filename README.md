@@ -25,6 +25,7 @@ bash fetch_data.sh<br/>
 Step 4: Copy Relevant Data
 1. Download file from "https://drive.usercontent.google.com/download?id=1rp8kdyLPvErw2dTmqtjISRVvQLj6Yzje&export=download&authuser=0"
 2. Move it to data folder.
+3. Follow https://github.com/TimoBolkart/BFM_to_FLAME to get FLAME_albedo_from_BFM.npz and copy to data folder. This is required to run demo_teaser.
 
 Step 5: Run Reconstruct
 >python demos/demo_reconstruct.py -i TestSamples/personal --saveDepth True --saveObj True -s TestSamples/personal/output --saveVis true --saveKpt true <br/>
