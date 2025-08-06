@@ -105,6 +105,7 @@ def main(args):
             grid_image_list.append(grid_image)
         grid_image_all = np.concatenate(grid_image_list, 0)
         grid_image_all = rescale(grid_image_all, 0.6, channel_axis=-1)  # resize for showing in github
+        grid_image_all = np.clip(grid_image_all * 255, 0, 255).astype(np.uint8)
         writer.append_data(grid_image_all[:, :, [2, 1, 0]])
 
     print(f'-- please check the teaser figure in {savefolder}')
