@@ -1,3 +1,38 @@
+# Update to run in 2025
+
+OS: Ubuntu 20.04<br/>
+GPU: L4<br/>
+
+Step 1: Setup Env
+>add-apt-repository ppa:deadsnakes/ppa -y<br/>
+add-apt-repository ppa:ubuntu-toolchain-r/test -y<br/>
+apt update<br/>
+apt search python3.10<br/>
+apt-get install python3.10 python3.10-venv python3.10-distutils libgl1 python3.10-dev gcc-11 g++-11<br/>
+
+Step 2: Clone Repo
+
+Step 3: Setup DECA
+>cd ~/DECA<br/>
+python3.10 -m venv --without-pip deca<br/>
+source deca/bin/activate<br/>
+python --version<br/>
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py <br/>
+python get-pip.py <br/>
+pip install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117 <br/>
+pip install --upgrade pip setuptools wheel build cython<br/>
+pip install -r requirements.txt<br/>
+bash fetch_data.sh<br/>
+
+Step 4: Copy Relevant Data
+1. Download file from ""
+2. Copy to data folder after "bash fetch_data.sh" completed.
+
+Step 5: Run Reconstruct
+>python demos/demo_reconstruct.py -i TestSamples/personal --saveDepth True --saveObj True -s TestSamples/personal/output --saveVis true --saveKpt true <br/>
+
+Step 6: Use Meshlab to view the output .obj files.
+
 # DECA: Detailed Expression Capture and Animation (SIGGRAPH2021)
 
 <p align="center"> 
