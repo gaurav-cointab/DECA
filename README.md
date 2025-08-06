@@ -7,7 +7,6 @@ Step 1: Setup Env
 >add-apt-repository ppa:deadsnakes/ppa -y<br/>
 add-apt-repository ppa:ubuntu-toolchain-r/test -y<br/>
 apt update<br/>
-apt search python3.10<br/>
 apt-get install python3.10 python3.10-venv python3.10-distutils libgl1 python3.10-dev gcc-11 g++-11<br/>
 
 Step 2: Clone Repo
