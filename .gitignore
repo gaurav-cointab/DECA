@@ -16,6 +16,7 @@
 *.tar
 *.zip
 .idea
+data
 
 # OS generated files #
 ######################
