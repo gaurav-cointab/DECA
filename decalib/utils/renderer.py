@@ -41,7 +41,7 @@ def set_rasterizer(type='pytorch3d'):
             load(name='standard_rasterize_cuda',
                  sources=[f'{curr_dir}/rasterizer/standard_rasterize_cuda.cpp',
                           f'{curr_dir}/rasterizer/standard_rasterize_cuda_kernel.cu'],
-                 extra_cuda_cflags=['-std=c++14', '-ccbin=$$(which gcc-11)'])
+                 extra_cuda_cflags=['-std=c++17', '-ccbin=$$(which gcc-11)'])
         from standard_rasterize_cuda import standard_rasterize
     # If JIT does not work, try manually installation first
     # 1. see instruction here: pixielib/utils/rasterizer/INSTALL.md
