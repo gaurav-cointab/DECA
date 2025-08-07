@@ -13,4 +13,5 @@ yacs==0.1.8
 kornia
 ninja
 fvcore
+matplotlib
 # pytorch3d
