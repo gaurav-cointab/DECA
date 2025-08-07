@@ -13,26 +13,27 @@
 # For comments or questions, please email us at deca@tue.mpg.de
 # For commercial licensing contact, please contact ps-license@tuebingen.mpg.de
 
-import os, sys
+import argparse
+import os
+import sys
+
 import cv2
 import numpy as np
-from time import time
-from scipy.io import savemat
-import argparse
-from tqdm import tqdm
 import torch
-
+from scipy.io import savemat
+from tqdm import tqdm
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from decalib.deca import DECA
 from decalib.datasets import datasets
 from decalib.utils import util
 from decalib.utils.config import cfg as deca_cfg
-from decalib.utils.tensor_cropper import transform_points
 
-def main(args):
-    # if args.rasterizer_type != 'standard':
-    #     args.render_orig = False
+args = None
+
+
+def main():
+    global args
     savefolder = args.savefolder
     device = args.device
     os.makedirs(savefolder, exist_ok=True)
@@ -41,18 +42,16 @@ def main(args):
     testdata = datasets.TestData(args.inputpath, iscrop=args.iscrop, face_detector=args.detector,
                                  sample_step=args.sample_step, device=args.device)
 
-    # run DECA
     deca_cfg.model.use_tex = args.useTex
     deca_cfg.rasterizer_type = args.rasterizer_type
     deca_cfg.model.extract_tex = args.extractTex
     deca = DECA(config=deca_cfg, device=device)
-    # for i in range(len(testdata)):
     for i in tqdm(range(len(testdata))):
         name = testdata[i]['imagename']
         images = testdata[i]['image'].to(device)[None, ...]
         with torch.no_grad():
             codedict = deca.encode(images)
-            opdict, visdict = deca.decode(codedict)  # tensor
+            opdict, visdict = deca.decode(codedict)
             if args.render_orig:
                 tform = testdata[i]['tform'][None, ...]
                 tform = torch.inverse(tform).transpose(1, 2).to(device)
@@ -62,7 +61,7 @@ def main(args):
 
         if args.saveDepth or args.saveKpt or args.saveObj or args.saveMat or args.saveImages:
             os.makedirs(os.path.join(savefolder, name), exist_ok=True)
-        # -- save results
+
         if args.saveDepth:
             depth_image = deca.render.render_depth(opdict['trans_verts']).repeat(1, 3, 1, 1)
             visdict['depth_images'] = depth_image
@@ -95,6 +94,7 @@ def main(args):
 
 
 if __name__ == '__main__':
+    global args
     parser = argparse.ArgumentParser(description='DECA: Detailed Expression Capture and Animation')
 
     parser.add_argument('-i', '--inputpath', default='TestSamples/examples', type=str,
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # rendering option
     parser.add_argument('--rasterizer_type', default='standard', type=str,
                         help='rasterizer type: pytorch3d or standard')
-    parser.add_argument('--render_orig', default=True, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--render_orig', default=False, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to render results in original image size, currently only works when rasterizer_type=standard')
     # save
     parser.add_argument('--useTex', default=True, type=lambda x: x.lower() in ['true', '1'],
@@ -121,9 +121,9 @@ if __name__ == '__main__':
                             set it to True only if you downloaded texture model')
     parser.add_argument('--extractTex', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to extract texture from input image as the uv texture map, set false if you want albeo map from FLAME mode')
-    parser.add_argument('--saveVis', default=True, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveVis', default=False, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save visualization of output')
-    parser.add_argument('--saveKpt', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveKpt', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save 2D and 3D keypoints')
     parser.add_argument('--saveDepth', default=False, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save depth image')
@@ -134,4 +134,5 @@ if __name__ == '__main__':
                         help='whether to save outputs as .mat')
     parser.add_argument('--saveImages', default=False, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save visualization output as seperate images')
-    main(parser.parse_args())
+    args = parser.parse_args()
+    main()
