@@ -1,9 +1,11 @@
 import argparse
+import glob
 import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.spatial import procrustes
+from tqdm import tqdm
 
 CONFIDENCE_THRESHOLD = 0.5
 MATCH_THRESHOLD = 0.01
@@ -57,28 +59,39 @@ def visualize_landmarks(lmk1, lmk2, title="Landmark Overlay", fileName=None, lab
 
 def main(landmarka_path, landmarkb_path, output):
     os.makedirs(output, exist_ok=True)
+    lman = os.path.splitext(os.path.basename(landmarka_path))[0]
+    lmbn = os.path.splitext(os.path.basename(landmarkb_path))[0]
+    fileName = os.path.join(output, lman + lmbn + ".jpg")
     landmarks3d_a = np.loadtxt(landmarka_path)
     landmarks3d_b = np.loadtxt(landmarkb_path)
     disparity = compare_landmarks3d(landmarks3d_a, landmarks3d_b)
     print(f"Procrustes Disparity: {disparity:.5f}")
-    if is_same_person(disparity):
-        print("✅ Likely the same person")
+    is_same = is_same_person(disparity)
+    title = "Similarity Result: "
+    if is_same:
+        title = title + "Same"
     else:
-        print("❌ Possibly different person")
-    lman = os.path.splitext(os.path.basename(landmarka_path))[0]
-    lmbn = os.path.splitext(os.path.basename(landmarkb_path))[0]
-    fileName = os.path.join(output, lman + lmbn + ".jpg")
-    visualize_landmarks(landmarks3d_a, landmarks3d_b, fileName=fileName, labelA=lman, labelB=lmbn)
+        title = title + "Diff"
+    title = title + f"({disparity:.5f})"
+    visualize_landmarks(landmarks3d_a, landmarks3d_b, title=title, fileName=fileName, labelA=lman, labelB=lmbn)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DECA: Detailed Expression Capture and Animation')
-
-    parser.add_argument('-a', '--landmarka', type=str, required=True,
+    parser.add_argument('-a', '--landmarka', type=str,
                         help='path to the landmark a')
-    parser.add_argument('-b', '--landmarkb', type=str, required=True,
+    parser.add_argument('-b', '--landmarkb', type=str,
                         help='path to the landmark b')
+    parser.add_argument('-f', '--landmarks', type=str,
+                        help='path to the landmarks folder')
     parser.add_argument('-o', '--output', type=str, required=True,
                         help='path to the output folder')
     args = parser.parse_args()
-    main(args.landmarka, args.landmarkb, args.output)
+    if args.landmarks is not None:
+        lmn_files = sorted(glob.glob(os.path.join(args.landmarks, "**", "*kpt3d.txt")))
+        for i in tqdm(range(len(lmn_files))):
+            for j in tqdm(range(len(lmn_files))):
+                if j > i:
+                    main(lmn_files[i], lmn_files[j], args.output)
+    else:
+        main(args.landmarka, args.landmarkb, args.output)
