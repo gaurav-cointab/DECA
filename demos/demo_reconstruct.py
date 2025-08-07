@@ -29,7 +29,7 @@ from decalib.datasets import datasets
 from decalib.utils import util
 from decalib.utils.config import cfg as deca_cfg
 
-args = None
+# args = None
 
 
 def main():
