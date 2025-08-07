@@ -51,6 +51,9 @@ def main():
         images = testdata[i]['image'].to(device)[None, ...]
         with torch.no_grad():
             codedict = deca.encode(images)
+            if args.neutral:
+                codedict['exp'] = torch.zeros_like(codedict['exp'])
+                codedict['pose]'] = torch.zeros_like(codedict['pose'])
             opdict, visdict = deca.decode(codedict)
             if args.render_orig:
                 tform = testdata[i]['tform'][None, ...]
@@ -103,19 +106,18 @@ if __name__ == '__main__':
                         help='path to the output directory, where results(obj, txt files) will be stored.')
     parser.add_argument('--device', default='cuda', type=str,
                         help='set device, cpu for using cpu')
-    # process test images
     parser.add_argument('--iscrop', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to crop input image, set false only when the test image are well cropped')
     parser.add_argument('--sample_step', default=10, type=int,
                         help='sample images from video data for every step')
     parser.add_argument('--detector', default='fan', type=str,
                         help='detector for cropping face, check decalib/detectors.py for details')
-    # rendering option
     parser.add_argument('--rasterizer_type', default='standard', type=str,
                         help='rasterizer type: pytorch3d or standard')
+    parser.add_argument('--neutral', default=True, type=lambda x: x.lower() in ['true', '1'],
+                        help='whether to convert the images neutral and then render')
     parser.add_argument('--render_orig', default=False, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to render results in original image size, currently only works when rasterizer_type=standard')
-    # save
     parser.add_argument('--useTex', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to use FLAME texture model to generate uv texture map, \
                             set it to True only if you downloaded texture model')
