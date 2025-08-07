@@ -27,11 +27,9 @@ def preprocess_landmarks(landmarks):
 def compare_landmarks3d(lmk1, lmk2):
     norm1 = preprocess_landmarks(lmk1)
     norm2 = preprocess_landmarks(lmk2)
-
     n = min(len(norm1), len(norm2))
     norm1 = norm1[:n]
     norm2 = norm2[:n]
-
     _, _, disparity = procrustes(norm1, norm2)
     return disparity
 
@@ -41,14 +39,14 @@ def is_same_person(disparity, threshold=MATCH_THRESHOLD):
 
 
 def visualize_landmarks(lmk1, lmk2, title="Landmark Overlay", fileName=None, labelA=None, labelB=None):
-    lmk1 = preprocess_landmarks(lmk1)
-    lmk2 = preprocess_landmarks(lmk2)
-    n = min(len(lmk1), len(lmk2))
-    lmk1, lmk2 = lmk1[:n], lmk2[:n]
+    norm1 = preprocess_landmarks(lmk1)
+    norm2 = preprocess_landmarks(lmk2)
+    n = min(len(norm1), len(norm2))
+    norm1, norm2 = norm1[:n], norm2[:n]
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(lmk1[:, 0], lmk1[:, 1], lmk1[:, 2], label=labelA, alpha=0.7)
-    ax.scatter(lmk2[:, 0], lmk2[:, 1], lmk2[:, 2], label=labelB, alpha=0.7)
+    ax.scatter(norm1[:, 0], norm1[:, 1], norm1[:, 2], label=labelA, alpha=0.7)
+    ax.scatter(norm2[:, 0], norm2[:, 1], norm2[:, 2], label=labelB, alpha=0.7)
     ax.set_title(title)
     ax.legend()
     if fileName is not None:
