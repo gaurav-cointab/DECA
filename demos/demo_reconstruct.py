@@ -116,7 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--render_orig', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to render results in original image size, currently only works when rasterizer_type=standard')
     # save
-    parser.add_argument('--useTex', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--useTex', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to use FLAME texture model to generate uv texture map, \
                             set it to True only if you downloaded texture model')
     parser.add_argument('--extractTex', default=True, type=lambda x: x.lower() in ['true', '1'],
