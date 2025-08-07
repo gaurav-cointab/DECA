@@ -61,7 +61,7 @@ def main(landmarka_path, landmarkb_path, output):
     os.makedirs(output, exist_ok=True)
     lman = os.path.splitext(os.path.basename(landmarka_path))[0]
     lmbn = os.path.splitext(os.path.basename(landmarkb_path))[0]
-    fileName = os.path.join(output, lman + lmbn + ".jpg")
+    fileName = os.path.join(output, lman + "_" + lmbn + ".jpg")
     landmarks3d_a = np.loadtxt(landmarka_path)
     landmarks3d_b = np.loadtxt(landmarkb_path)
     disparity = compare_landmarks3d(landmarks3d_a, landmarks3d_b)
