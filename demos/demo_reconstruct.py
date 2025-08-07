@@ -116,25 +116,25 @@ if __name__ == '__main__':
                         help='rasterizer type: pytorch3d or standard')
     parser.add_argument('--neutral', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to convert the images neutral and then render')
-    parser.add_argument('--render_orig', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--render_orig', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to render results in original image size, currently only works when rasterizer_type=standard')
     parser.add_argument('--useTex', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to use FLAME texture model to generate uv texture map, \
                             set it to True only if you downloaded texture model')
     parser.add_argument('--extractTex', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to extract texture from input image as the uv texture map, set false if you want albeo map from FLAME mode')
-    parser.add_argument('--saveVis', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveVis', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save visualization of output')
     parser.add_argument('--saveKpt', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save 2D and 3D keypoints')
-    parser.add_argument('--saveDepth', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveDepth', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save depth image')
-    parser.add_argument('--saveObj', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveObj', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save outputs as .obj, detail mesh will end with _detail.obj. \
                             Note that saving objs could be slow')
-    parser.add_argument('--saveMat', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveMat', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save outputs as .mat')
-    parser.add_argument('--saveImages', default=False, type=lambda x: x.lower() in ['true', '1'],
+    parser.add_argument('--saveImages', default=True, type=lambda x: x.lower() in ['true', '1'],
                         help='whether to save visualization output as seperate images')
     args = parser.parse_args()
     main()
