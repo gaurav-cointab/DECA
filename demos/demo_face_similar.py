@@ -56,6 +56,7 @@ def visualize_landmarks(lmk1, lmk2, title="Landmark Overlay", fileName=None, lab
 
 
 def main(landmarka_path, landmarkb_path, output):
+    os.makedirs(output, exist_ok=True)
     landmarks3d_a = np.loadtxt(landmarka_path)
     landmarks3d_b = np.loadtxt(landmarkb_path)
     disparity = compare_landmarks3d(landmarks3d_a, landmarks3d_b)
