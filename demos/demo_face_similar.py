@@ -65,7 +65,6 @@ def main(landmarka_path, landmarkb_path, output):
     landmarks3d_a = np.loadtxt(landmarka_path)
     landmarks3d_b = np.loadtxt(landmarkb_path)
     disparity = compare_landmarks3d(landmarks3d_a, landmarks3d_b)
-    print(f"Procrustes Disparity: {disparity:.5f}")
     is_same = is_same_person(disparity)
     title = "Similarity Result: "
     if is_same:
