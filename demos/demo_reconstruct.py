@@ -195,11 +195,9 @@ def main():
                              'landmarks2d']:
                 if vis_name not in visdict.keys():
                     continue
-                image = util.tensor2image(visdict[vis_name][0])
                 cv2.imwrite(os.path.join(savefolder, name, name + '_' + vis_name + '.jpg'),
                             util.tensor2image(visdict[vis_name][0]))
                 if args.render_orig:
-                    image = util.tensor2image(orig_visdict[vis_name][0])
                     cv2.imwrite(os.path.join(savefolder, name, 'orig_' + name + '_' + vis_name + '.jpg'),
                                 util.tensor2image(orig_visdict[vis_name][0]))
     print(f'-- please check the results in {savefolder}')
