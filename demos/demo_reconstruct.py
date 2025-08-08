@@ -160,6 +160,50 @@ def main():
                 orig_visdict['inputs'] = original_image
             torch.save(codedict, os.path.join(savefolder, name, name + '_codedict.txt'))
             save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict.json'))
+            if args.neutral:
+                codedict_j = codedict.copy()
+                codedict_e = codedict.copy()
+                codedict_n = codedict.copy()
+
+                codedict_j['pose', 3:6] = 0.0
+                opdict_j, visdict_j = deca.decode(codedict_j)
+                if args.saveKpt:
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_jaw.txt'),
+                               opdict_j['landmarks2d'][0].cpu().numpy())
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_jaw.txt'),
+                               opdict_j['landmarks3d'][0].cpu().numpy())
+                if args.saveImages:
+                    cv2.imwrite(os.path.join(savefolder, name, name + '_' + 'landmarks2d_jaw' + '.jpg'),
+                                util.tensor2image(visdict_j['landmarks2d'][0]))
+                if args.saveVis:
+                    cv2.imwrite(os.path.join(savefolder, name, name + '_vis_jaw.jpg'), deca.visualize(visdict_j))
+
+                codedict_e['pose', 9:15] = 0.0
+                opdict_e, visdict_e = deca.decode(codedict_e)
+                if args.saveKpt:
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_eye.txt'),
+                               opdict_e['landmarks2d'][0].cpu().numpy())
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_eye.txt'),
+                               opdict_e['landmarks3d'][0].cpu().numpy())
+                if args.saveImages:
+                    cv2.imwrite(os.path.join(savefolder, name, name + '_' + 'landmarks2d_eye' + '.jpg'),
+                                util.tensor2image(visdict_e['landmarks2d'][0]))
+                if args.saveVis:
+                    cv2.imwrite(os.path.join(savefolder, name, name + '_vis_eye.jpg'), deca.visualize(visdict_e))
+
+                codedict_n['exp'] = torch.zeros_like(codedict_n['exp'])
+                codedict_n['pose'] = torch.zeros_like(codedict_n['pose'])
+                opdict_n, visdict_n = deca.decode(codedict_n)
+                if args.saveKpt:
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_neutral.txt'),
+                               opdict_n['landmarks2d'][0].cpu().numpy())
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_neutral.txt'),
+                               opdict_n['landmarks3d'][0].cpu().numpy())
+                if args.saveImages:
+                    cv2.imwrite(os.path.join(savefolder, name, name + '_' + 'landmarks2d_neutral' + '.jpg'),
+                                util.tensor2image(visdict_n['landmarks2d'][0]))
+                if args.saveVis:
+                    cv2.imwrite(os.path.join(savefolder, name, name + '_vis_neutral.jpg'), deca.visualize(visdict_n))
 
         if args.saveKpt:
             np.savetxt(os.path.join(savefolder, name, name + '_kpt2d.txt'), opdict['landmarks2d'][0].cpu().numpy())
@@ -174,10 +218,12 @@ def main():
         if args.saveMat:
             opdict = util.dict_tensor2npy(opdict)
             savemat(os.path.join(savefolder, name, name + '.mat'), opdict)
+
         if args.saveVis:
             cv2.imwrite(os.path.join(savefolder, name + '_vis.jpg'), deca.visualize(visdict))
             if args.render_orig:
                 cv2.imwrite(os.path.join(savefolder, name + '_vis_original_size.jpg'), deca.visualize(orig_visdict))
+
         if args.saveImages:
             for vis_name in ['inputs', 'rendered_images', 'albedo_images', 'shape_images', 'shape_detail_images',
                              'landmarks2d']:
