@@ -193,7 +193,7 @@ def main():
                 cv2.imwrite(os.path.join(savefolder, name, name + '_vis_eye.jpg'), deca.visualize(visdict_1))
 
                 codedict_1 = codedict.copy()
-                exp_1 = pose.clone()
+                exp_1 = exp.clone()
                 pose_1 = pose.clone()
                 exp_1 = torch.zeros_like(exp_1)
                 pose_1 = torch.zeros_like(pose_1)
