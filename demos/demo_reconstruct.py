@@ -165,7 +165,7 @@ def main():
                 codedict_e = codedict.copy()
                 codedict_n = codedict.copy()
 
-                codedict_j['pose', 3:6] = 0.0
+                codedict_j['pose'][3:6] = 0.0
                 opdict_j, visdict_j = deca.decode(codedict_j)
                 if args.saveKpt:
                     np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_jaw.txt'),
@@ -178,7 +178,7 @@ def main():
                 if args.saveVis:
                     cv2.imwrite(os.path.join(savefolder, name, name + '_vis_jaw.jpg'), deca.visualize(visdict_j))
 
-                codedict_e['pose', 9:15] = 0.0
+                codedict_e['pose'][9:15] = 0.0
                 opdict_e, visdict_e = deca.decode(codedict_e)
                 if args.saveKpt:
                     np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_eye.txt'),
