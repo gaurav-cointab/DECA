@@ -1,6 +1,7 @@
 import argparse
 import glob
 import os
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,7 +39,8 @@ def is_same_person(disparity, threshold=MATCH_THRESHOLD):
     return disparity < threshold
 
 
-def visualize_landmarks(lmk1, lmk2, title="Landmark Overlay", fileName=None, labelA=None, labelB=None, colorA="red", colorB="blue"):
+def visualize_landmarks(lmk1, lmk2, title="Landmark Overlay", fileName=None, labelA=None, labelB=None, colorA="red",
+                        colorB="blue"):
     norm1 = preprocess_landmarks(lmk1)
     norm2 = preprocess_landmarks(lmk2)
     n = min(len(norm1), len(norm2))
@@ -59,7 +61,7 @@ def main(landmarka_path, landmarkb_path, output):
     os.makedirs(output, exist_ok=True)
     lman = os.path.splitext(os.path.basename(landmarka_path))[0]
     lmbn = os.path.splitext(os.path.basename(landmarkb_path))[0]
-    fileName = os.path.join(output, lman + "_" + lmbn + ".jpg")
+    fileName = os.path.join(output, lmbn + ".jpg")
     landmarks3d_a = np.loadtxt(landmarka_path)
     landmarks3d_b = np.loadtxt(landmarkb_path)
     disparity = compare_landmarks3d(landmarks3d_a, landmarks3d_b)
@@ -86,9 +88,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.landmarks is not None:
         lmn_files = sorted(glob.glob(os.path.join(args.landmarks, "**", "*kpt3d.txt")))
+        code_files = sorted(glob.glob(os.path.join(args.landmarks, "**", "*codedict.json")))
+
         for i in tqdm(range(len(lmn_files))):
             for j in tqdm(range(len(lmn_files))):
                 if j > i:
-                    main(lmn_files[i], lmn_files[j], args.output)
+                    main(lmn_files[i], lmn_files[j], str(Path(lmn_files[i]).resolve().parent))
     else:
         main(args.landmarka, args.landmarkb, args.output)
