@@ -53,7 +53,7 @@ def main():
             codedict = deca.encode(images)
             if args.neutral:
                 codedict['exp'] = torch.zeros_like(codedict['exp'])
-                codedict['pose]'] = torch.zeros_like(codedict['pose'])
+                codedict['pose'] = torch.zeros_like(codedict['pose'])
             opdict, visdict = deca.decode(codedict)
             if args.render_orig:
                 tform = testdata[i]['tform'][None, ...]
