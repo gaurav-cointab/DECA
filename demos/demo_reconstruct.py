@@ -151,24 +151,6 @@ def main():
 
         with torch.no_grad():
             codedict = deca.encode(images)
-            torch.save(codedict, os.path.join(savefolder, name, name + '_codedict_orig.txt'))
-            save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict_orig.json'))
-            opdict, visdict = deca.decode(codedict)
-            if args.saveKpt:
-                np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_orig.txt'),
-                           opdict['landmarks2d'][0].cpu().numpy())
-                np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_orig.txt'),
-                           opdict['landmarks3d'][0].cpu().numpy())
-            if args.neutral:
-                codedict['exp'] = torch.zeros_like(codedict['exp'])
-                codedict['pose'] = torch.zeros_like(codedict['pose'])
-                torch.save(codedict, os.path.join(savefolder, name, name + '_codedict_neutral.txt'))
-                save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict_neutral.json'))
-                if args.saveKpt:
-                    np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_neutral.txt'),
-                               opdict['landmarks2d'][0].cpu().numpy())
-                    np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_neutral.txt'),
-                               opdict['landmarks3d'][0].cpu().numpy())
             opdict, visdict = deca.decode(codedict)
             if args.render_orig:
                 tform = testdata[i]['tform'][None, ...]
@@ -176,6 +158,8 @@ def main():
                 original_image = testdata[i]['original_image'][None, ...].to(device)
                 _, orig_visdict = deca.decode(codedict, render_orig=True, original_image=original_image, tform=tform)
                 orig_visdict['inputs'] = original_image
+            torch.save(codedict, os.path.join(savefolder, name, name + '_codedict.txt'))
+            save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict.json'))
 
         if args.saveDepth:
             depth_image = deca.render.render_depth(opdict['trans_verts']).repeat(1, 3, 1, 1)
@@ -186,6 +170,9 @@ def main():
         if args.saveMat:
             opdict = util.dict_tensor2npy(opdict)
             savemat(os.path.join(savefolder, name, name + '.mat'), opdict)
+        if args.saveKpt:
+            np.savetxt(os.path.join(savefolder, name, name + '_kpt2d.txt'), opdict['landmarks2d'][0].cpu().numpy())
+            np.savetxt(os.path.join(savefolder, name, name + '_kpt3d.txt'), opdict['landmarks3d'][0].cpu().numpy())
         if args.saveVis:
             cv2.imwrite(os.path.join(savefolder, name + '_vis.jpg'), deca.visualize(visdict))
             if args.render_orig:
