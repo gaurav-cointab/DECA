@@ -30,6 +30,7 @@ from decalib.deca import DECA
 from decalib.datasets import datasets
 from decalib.utils import util
 from decalib.utils.config import cfg as deca_cfg
+from decalib.utils.pose_describe import attach_pose_descriptions
 
 
 def rotvec_to_euler_deg(rotvec: torch.Tensor):
@@ -115,16 +116,15 @@ def save_codedict_human_readable(
             "std": r(float(shape.std(unbiased=False).item()))
         }
 
-    # Assemble final JSON
     out = {
         "pose": pose_block,
         "shape_summary": shape_block,
     }
 
-    # Optional: drop None fields to keep it tidy
     out = {k: v for k, v in out.items() if v is not None}
 
-    # Round nested floats for readability (already rounded; ensure clean printing)
+    attach_pose_descriptions(out)
+
     with open(path, "w") as f:
         json.dump(out, f, indent=2)
 
