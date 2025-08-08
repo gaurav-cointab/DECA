@@ -161,6 +161,9 @@ def main():
             torch.save(codedict, os.path.join(savefolder, name, name + '_codedict.txt'))
             save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict.json'))
 
+        if args.saveKpt:
+            np.savetxt(os.path.join(savefolder, name, name + '_kpt2d.txt'), opdict['landmarks2d'][0].cpu().numpy())
+            np.savetxt(os.path.join(savefolder, name, name + '_kpt3d.txt'), opdict['landmarks3d'][0].cpu().numpy())
         if args.saveDepth:
             depth_image = deca.render.render_depth(opdict['trans_verts']).repeat(1, 3, 1, 1)
             visdict['depth_images'] = depth_image
@@ -170,9 +173,6 @@ def main():
         if args.saveMat:
             opdict = util.dict_tensor2npy(opdict)
             savemat(os.path.join(savefolder, name, name + '.mat'), opdict)
-        if args.saveKpt:
-            np.savetxt(os.path.join(savefolder, name, name + '_kpt2d.txt'), opdict['landmarks2d'][0].cpu().numpy())
-            np.savetxt(os.path.join(savefolder, name, name + '_kpt3d.txt'), opdict['landmarks3d'][0].cpu().numpy())
         if args.saveVis:
             cv2.imwrite(os.path.join(savefolder, name + '_vis.jpg'), deca.visualize(visdict))
             if args.render_orig:
