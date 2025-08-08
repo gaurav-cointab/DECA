@@ -146,7 +146,6 @@ def main():
     for i in tqdm(range(len(testdata))):
         name = testdata[i]['imagename']
         images = testdata[i]['image'].to(device)[None, ...]
-        original_image = testdata[i]['original_image'][None, ...].to(device)
         if args.saveDepth or args.saveKpt or args.saveObj or args.saveMat or args.saveImages:
             os.makedirs(os.path.join(savefolder, name), exist_ok=True)
 
@@ -158,7 +157,9 @@ def main():
             original_image = testdata[i]['original_image'][None, ...].to(device)
             _, orig_visdict = deca.decode(codedict, render_orig=True, original_image=original_image, tform=tform)
             orig_visdict['inputs'] = original_image
-            cv2.imwrite(os.path.join(savefolder, name + '_vis_original_size.jpg'), deca.visualize(orig_visdict))
+            cv2.imwrite(os.path.join(savefolder, name, name + '_' + 'landmarks2d' + '.jpg'),
+                        util.tensor2image(visdict['landmarks2d'][0]))
+            cv2.imwrite(os.path.join(savefolder, name, name + '_vis_original.jpg'), deca.visualize(orig_visdict))
             torch.save(codedict, os.path.join(savefolder, name, name + '_codedict.txt'))
             save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict.json'))
             if args.neutral:
