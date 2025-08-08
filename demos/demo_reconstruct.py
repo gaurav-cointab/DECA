@@ -14,6 +14,8 @@
 # For commercial licensing contact, please contact ps-license@tuebingen.mpg.de
 
 import argparse
+import json
+import math
 import os
 import sys
 
@@ -29,7 +31,102 @@ from decalib.datasets import datasets
 from decalib.utils import util
 from decalib.utils.config import cfg as deca_cfg
 
-# args = None
+
+def rotvec_to_euler_deg(rotvec: torch.Tensor):
+    rotvec = rotvec.float()
+    theta = torch.linalg.norm(rotvec)
+    if theta < 1e-8:
+        return 0.0, 0.0, 0.0
+
+    axis = rotvec / theta
+    K = torch.tensor(
+        [[0.0, -axis[2].item(), axis[1].item()],
+         [axis[2].item(), 0.0, -axis[0].item()],
+         [-axis[1].item(), axis[0].item(), 0.0]],
+        dtype=torch.float32
+    )
+    I = torch.eye(3, dtype=torch.float32)
+    R = I + torch.sin(theta) * K + (1 - torch.cos(theta)) * (K @ K)
+    r11, r21, r31 = R[0, 0].item(), R[1, 0].item(), R[2, 0].item()
+    r32, r33 = R[2, 1].item(), R[2, 2].item()
+
+    yaw = math.degrees(math.atan2(r21, r11))
+    pitch = math.degrees(math.asin(max(-1.0, min(1.0, -r31))))
+    roll = math.degrees(math.atan2(r32, r33))
+    return yaw, pitch, roll
+
+
+def topk_by_abs(x: torch.Tensor, k: int):
+    if x.numel() == 0:
+        return []
+    k = min(k, x.numel())
+    vals = x.flatten()
+    idx = torch.topk(vals.abs(), k).indices.tolist()
+    out = []
+    for i in idx:
+        v = vals[i].item()
+        out.append({"index": int(i), "value": v, "abs_value": abs(v)})
+    out.sort(key=lambda d: (-d["abs_value"], d["index"]))
+    return out
+
+
+def save_codedict_human_readable(
+        codedict: dict,
+        path: str,
+        *,
+        topk_shape: int = 10,
+        round_ndigits: int = 4
+):
+    def r(x):
+        return round(float(x), round_ndigits)
+
+    # Select first item if batched
+    def first_row(t):
+        if t is None:
+            return None
+        if t.ndim >= 2:
+            return t[0].detach().cpu()
+        return t.detach().cpu()
+
+    # Pull components safely
+    pose = first_row(codedict.get("pose"))
+    shape = first_row(codedict.get("shape"))
+
+    # Pose block
+    pose_block = None
+    if pose is not None and pose.numel() >= 3:
+        rotvec = pose[:3]
+        trans = pose[3:] if pose.numel() >= 6 else torch.tensor([])
+        yaw, pitch, roll = rotvec_to_euler_deg(rotvec)
+        pose_block = {
+            "rotation_axis_angle": [r(v) for v in rotvec.tolist()],
+            "yaw_pitch_roll_deg": [r(yaw), r(pitch), r(roll)],
+            "translation": [r(v) for v in trans.tolist()] if trans.numel() else None
+        }
+
+    # Shape summary (top-k by |value|)
+    shape_block = None
+    if shape is not None and shape.numel() > 0:
+        topk = topk_by_abs(shape, topk_shape)
+        shape_block = {
+            "top_k_by_abs": [{**d, "value": r(d["value"]), "abs_value": r(d["abs_value"])} for d in topk],
+            "l2_norm": r(float(torch.linalg.norm(shape).item())),
+            "mean": r(float(shape.mean().item())),
+            "std": r(float(shape.std(unbiased=False).item()))
+        }
+
+    # Assemble final JSON
+    out = {
+        "pose": pose_block,
+        "shape_summary": shape_block,
+    }
+
+    # Optional: drop None fields to keep it tidy
+    out = {k: v for k, v in out.items() if v is not None}
+
+    # Round nested floats for readability (already rounded; ensure clean printing)
+    with open(path, "w") as f:
+        json.dump(out, f, indent=2)
 
 
 def main():
@@ -49,11 +146,29 @@ def main():
     for i in tqdm(range(len(testdata))):
         name = testdata[i]['imagename']
         images = testdata[i]['image'].to(device)[None, ...]
+        if args.saveDepth or args.saveKpt or args.saveObj or args.saveMat or args.saveImages:
+            os.makedirs(os.path.join(savefolder, name), exist_ok=True)
+
         with torch.no_grad():
             codedict = deca.encode(images)
+            torch.save(codedict, os.path.join(savefolder, name, name + '_codedict_orig.txt'))
+            save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict_orig.json'))
+            opdict, visdict = deca.decode(codedict)
+            if args.saveKpt:
+                np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_orig.txt'),
+                           opdict['landmarks2d'][0].cpu().numpy())
+                np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_orig.txt'),
+                           opdict['landmarks3d'][0].cpu().numpy())
             if args.neutral:
                 codedict['exp'] = torch.zeros_like(codedict['exp'])
                 codedict['pose'] = torch.zeros_like(codedict['pose'])
+                torch.save(codedict, os.path.join(savefolder, name, name + '_codedict_neutral.txt'))
+                save_codedict_human_readable(codedict, os.path.join(savefolder, name, name + '_codedict_neutral.json'))
+                if args.saveKpt:
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt2d_neutral.txt'),
+                               opdict['landmarks2d'][0].cpu().numpy())
+                    np.savetxt(os.path.join(savefolder, name, name + '_kpt3d_neutral.txt'),
+                               opdict['landmarks3d'][0].cpu().numpy())
             opdict, visdict = deca.decode(codedict)
             if args.render_orig:
                 tform = testdata[i]['tform'][None, ...]
@@ -62,16 +177,10 @@ def main():
                 _, orig_visdict = deca.decode(codedict, render_orig=True, original_image=original_image, tform=tform)
                 orig_visdict['inputs'] = original_image
 
-        if args.saveDepth or args.saveKpt or args.saveObj or args.saveMat or args.saveImages:
-            os.makedirs(os.path.join(savefolder, name), exist_ok=True)
-
         if args.saveDepth:
             depth_image = deca.render.render_depth(opdict['trans_verts']).repeat(1, 3, 1, 1)
             visdict['depth_images'] = depth_image
             cv2.imwrite(os.path.join(savefolder, name, name + '_depth.jpg'), util.tensor2image(depth_image[0]))
-        if args.saveKpt:
-            np.savetxt(os.path.join(savefolder, name, name + '_kpt2d.txt'), opdict['landmarks2d'][0].cpu().numpy())
-            np.savetxt(os.path.join(savefolder, name, name + '_kpt3d.txt'), opdict['landmarks3d'][0].cpu().numpy())
         if args.saveObj:
             deca.save_obj(os.path.join(savefolder, name, name + '.obj'), opdict)
         if args.saveMat:
@@ -138,3 +247,6 @@ if __name__ == '__main__':
                         help='whether to save visualization output as seperate images')
     args = parser.parse_args()
     main()
+else:
+    global args
+    args = None
