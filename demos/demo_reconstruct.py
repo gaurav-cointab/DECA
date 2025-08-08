@@ -245,6 +245,3 @@ if __name__ == '__main__':
                         help='whether to save visualization output as seperate images')
     args = parser.parse_args()
     main()
-else:
-    global args
-    args = None
